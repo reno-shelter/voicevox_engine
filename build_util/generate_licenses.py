@@ -166,6 +166,8 @@ def generate_licenses() -> List[License]:
         if license.text == "UNKNOWN":
             if license.name.lower() == "core" and license.version == "0.0.0":
                 continue
+            elif license.name.lower() == "tqdm-loggable":
+                continue
             elif license.name.lower() == "future":
                 with urllib.request.urlopen(
                     "https://raw.githubusercontent.com/PythonCharmers/python-future/master/LICENSE.txt"  # noqa: B950
