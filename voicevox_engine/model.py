@@ -13,8 +13,8 @@ class Mora(BaseModel):
     """
 
     text: str = Field(title="文字")
-    consonant: Optional[str] = Field(title="子音の音素")
-    consonant_length: Optional[float] = Field(title="子音の音長")
+    consonant: Optional[str] = Field(title="子音の音素", default=None)
+    consonant_length: Optional[float] = Field(title="子音の音長", default=None)
     vowel: str = Field(title="母音の音素")
     vowel_length: float = Field(title="母音の音長")
     pitch: float = Field(
@@ -65,7 +65,8 @@ class AudioQuery(BaseModel):
     outputSamplingRate: int = Field(title="音声データの出力サンプリングレート")
     outputStereo: bool = Field(title="音声データをステレオ出力するか否か")
     kana: Optional[str] = Field(
-        title="[読み取り専用]AquesTalk 風記法によるテキスト。音声合成用のクエリとしては無視される"
+        title="[読み取り専用]AquesTalk 風記法によるテキスト。音声合成用のクエリとしては無視される",
+        default=None,
     )
 
     def __hash__(self) -> int:
