@@ -21,7 +21,7 @@ from voicevox_engine.tts_pipeline.tts_engine import (
     make_tts_engines_from_cores,
 )
 from voicevox_engine.utility.core_version_utility import get_latest_core_version
-from voicevox_engine.utility.path_utility import engine_root
+from voicevox_engine.utility.path_utility import engine_root, get_save_dir
 
 
 class AudioQueryJob(BaseModel):
@@ -294,13 +294,18 @@ def create_app():
     cpu_num_threads: int | None = args.cpu_num_threads
     load_all_models: bool = args.load_all_models
 
+    save_dir = get_save_dir()
+
+    if not save_dir.is_dir():
+        save_dir.mkdir(parents=True)
+
     cores = initialize_cores(
         use_gpu=use_gpu,
-        voicevox_dir=voicevox_dir,
         voicelib_dirs=voicelib_dirs,
+        voicevox_dir=voicevox_dir,
         runtime_dirs=runtime_dirs,
-        enable_mock=enable_mock,
         cpu_num_threads=cpu_num_threads,
+        enable_mock=enable_mock,
         load_all_models=load_all_models,
     )
 
