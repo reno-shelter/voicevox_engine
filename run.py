@@ -1372,13 +1372,13 @@ def generate_app(
         )
         openapi_schema["components"]["schemas"][
             "VvlibManifest"
-        ] = VvlibManifest.schema()
+        ] = VvlibManifest.model_json_schema()
         # ref_templateを指定しない場合、definitionsを参照してしまうので、手動で指定する
-        base_library_info = BaseLibraryInfo.schema(
+        base_library_info = BaseLibraryInfo.model_json_schema(
             ref_template="#/components/schemas/{model}"
         )
         # definitionsは既存のモデルを重複して定義するため、不要なので削除
-        del base_library_info["definitions"]
+        del base_library_info["$defs"]
         openapi_schema["components"]["schemas"]["BaseLibraryInfo"] = base_library_info
         app.openapi_schema = openapi_schema
         return openapi_schema
