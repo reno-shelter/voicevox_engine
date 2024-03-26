@@ -4,9 +4,10 @@ import os
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Literal, Optional, Union
-from pydantic import BaseModel, Field
+
 import runpod
 import soundfile
+from pydantic import BaseModel, Field
 
 from voicevox_engine.core.core_adapter import CoreAdapter
 from voicevox_engine.core.core_initializer import initialize_cores
@@ -41,10 +42,12 @@ class SynthesisJob(BaseModel):
     style_id: StyleId
     enable_interrogative_upspeak: bool = True
 
+
 class AutoSynthesisJob(BaseModel):
     action: Literal["auto_synthesis"]
     text: str
     style_id: StyleId
+
 
 class SynthesisResult(BaseModel):
     wave: str
@@ -90,7 +93,7 @@ class App:
             return self.synthesis(
                 job.audio_query, job.style_id, job.enable_interrogative_upspeak
             )
-        
+
         if isinstance(job, AutoSynthesisJob):
             return self.auto_synthesis(job.text, job.style_id)
 
@@ -190,7 +193,7 @@ class App:
         base64_url = f"data:audio/wav;base64,{base64_wave}"
 
         return SynthesisResult(wave=base64_url, size=len(wavedata))
-    
+
     def auto_synthesis(self, text: str, style_id: StyleId) -> SynthesisResult:
         audio_query = self.audio_query(text, style_id)
         return self.synthesis(audio_query, style_id)
