@@ -4,19 +4,16 @@ import os
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Literal, Optional, Union
-from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import runpod
 import soundfile
 
 from voicevox_engine.core.core_adapter import CoreAdapter
 from voicevox_engine.core.core_initializer import initialize_cores
-from voicevox_engine.dev import tts_engine
 from voicevox_engine.metas.Metas import StyleId
 from voicevox_engine.model import AudioQuery
 from voicevox_engine.preset.PresetError import PresetError
 from voicevox_engine.preset.PresetManager import PresetManager
-from voicevox_engine.setting.SettingLoader import USER_SETTING_PATH
 from voicevox_engine.tts_pipeline.kana_converter import create_kana
 from voicevox_engine.tts_pipeline.tts_engine import (
     TTSEngine,
@@ -49,6 +46,10 @@ class AutoSynthesisJob(BaseModel):
     text: str
     style_id: StyleId
 
+class SynthesisResult(BaseModel):
+    wave: str
+    size: int
+
 
 JobTypes = Union[AudioQueryJob, AudioQueryFromPresetJob, SynthesisJob, AutoSynthesisJob]
 
@@ -78,7 +79,7 @@ class App:
         print(model)
         return self._action_switch(model.job)
 
-    def _action_switch(self, job: JobTypes):
+    def _action_switch(self, job: JobTypes) -> BaseModel:
         if isinstance(job, AudioQueryJob):
             return self.audio_query(job.text, job.style_id)
 
@@ -113,7 +114,7 @@ class App:
             f"指定されたバージョンの音声合成エンジンが見つかりませんでした: {core_version}"
         )
 
-    def audio_query(self, text: str, style_id: StyleId):
+    def audio_query(self, text: str, style_id: StyleId) -> AudioQuery:
         engine = self._get_engine()
         core = self._get_core()
         accent_phases = engine.create_accent_phrases(text, style_id)
@@ -131,7 +132,7 @@ class App:
             kana=create_kana(accent_phases),
         )
 
-    def audio_query_from_preset(self, text: str, preset_id: int):
+    def audio_query_from_preset(self, text: str, preset_id: int) -> AudioQuery:
         engine = self._get_engine()
         core = self._get_core()
         try:
@@ -166,7 +167,7 @@ class App:
         audio_query: AudioQuery,
         style_id: StyleId,
         enable_interrogative_upspeak: bool = True,
-    ):
+    ) -> SynthesisResult:
         engine = self._get_engine()
         wave = engine.synthesize_wave(
             query=audio_query,
@@ -188,12 +189,9 @@ class App:
             base64_wave = base64.b64encode(wavedata).decode("utf-8")
         base64_url = f"data:audio/wav;base64,{base64_wave}"
 
-        return {
-            "wave": base64_url,
-            "size": len(wavedata),
-        }
+        return SynthesisResult(wave=base64_url, size=len(wavedata))
     
-    def auto_synthesis(self, text: str, style_id: StyleId):
+    def auto_synthesis(self, text: str, style_id: StyleId) -> SynthesisResult:
         audio_query = self.audio_query(text, style_id)
         return self.synthesis(audio_query, style_id)
 
