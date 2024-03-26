@@ -314,7 +314,7 @@ def create_app():
 
     latest_core_version = get_latest_core_version(cores)
 
-    init_processes: int = args.init_processes
+    # init_processes: int = args.init_processes
 
     root_dir = voicevox_dir or engine_root()
 
