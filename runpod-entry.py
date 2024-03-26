@@ -80,7 +80,8 @@ class App:
         print(job)
         model = JobInput(job=job.get("input"))
         print(model)
-        return self._action_switch(model.job)
+        result = self._action_switch(model.job)
+        return result.model_dump()
 
     def _action_switch(self, job: JobTypes) -> BaseModel:
         if isinstance(job, AudioQueryJob):
